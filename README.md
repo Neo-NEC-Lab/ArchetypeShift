@@ -188,12 +188,13 @@ If you use ArchetypeShift in your manuscript, please cite:
 Future Publication Name
 
 **Primary Contact**: Adam Wilson
+
 **Lab**: Neo NEC Lab, University of Oklahoma Health Campus
+
 **Email**: adam-wilson@ou.edu
 
 ## Data Availability
 
 Due to storage constraints, raw and processed single-cell data are stored on the OU HPC system.
-Metadata and example outputs can be shared upon request.
 
--
+Metadata and example outputs can be shared upon request.
