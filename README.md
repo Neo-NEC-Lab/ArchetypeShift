@@ -87,22 +87,6 @@ Likely R package dependencies include:
 - `py_pcha`
 - `geosketch`
 
-## Quick Start
-
-Because this repo is currently script-based, source the functions you need before running the workflow.
-
-```r
-source("check_input.r")
-source("make_gene_universe.r")
-source("select_hvgs.r")
-source("pareto_fit2.r")
-source("phca_extract_weights.r")
-source("phca_dominant_archetype.r")
-source("compute_signature_cor.r")
-source("compute_occupancy.r")
-source("compute_contrasts.r")
-```
-
 ## Example Workflow
 
 ```r
