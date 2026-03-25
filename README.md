@@ -1,6 +1,6 @@
 # ArchetypeShift
 
-ArchetypeShift is an R package for fitting, annotating, and comparing transcriptional archetype programs in single-cell RNA-seq data, with particular emphasis on biological interpretation through correlation-based gene signatures, IPA canonical pathways, upstream regulators, and cluster/state localization. It is designed for Seurat-based workflows and supports reproducible preprocessing, ParetoTI/PCHA model fitting, archetype annotation, and downstream condition- and cluster-level comparisons. The package is especially useful when the goal is not only to identify archetypes, but also to interpret them as biologically meaningful programs across cell states and experimental conditions.
+ArchetypeShift is an R package for fitting, annotating, and comparing transcriptional archetype programs in single-cell RNA-seq data, with particular emphasis on biological interpretation through correlation-based gene signatures, IPA canonical pathways, upstream regulators, and cluster/state localization. It is designed for Seurat-based workflows and supports reproducible preprocessing, ParetoTI/PCHA model fitting, archetype annotation, and downstream condition- and cluster-level comparisons. The package is especially useful when the goal is not only to identify archetypes, but also to interpret them as biologically meaningful programs across cell states and experimental conditions. The package was developed for epithelial archetype analysis in scRNA-seq, but the core functions are general enough to be adapted to other cell systems.
 
 ## Installation
 
@@ -10,22 +10,6 @@ You can install ArchetypeShift with:
 devtools::install_github("Neo-NEC-Lab/ArchetypeShift")
 library(ArchetypeShift)
 ```
-
-## What This Package Does
-
-This workflow is designed to help you:
-
-- validate Seurat inputs and metadata columns
-- define a reproducible gene universe
-- select highly variable genes for PCA
-- fit ParetoTI/PCHA archetype models across a scan of `k`
-- extract per-cell archetype weights
-- compute correlation-based archetype gene signatures
-- summarize archetype occupancy at the sample and sample-by-cluster levels
-- test replicate-aware condition contrasts
-- generate publication-ready QC and summary plots
-
-The package was developed for epithelial archetype analysis in scRNA-seq, but the core functions are general enough to be adapted to other cell systems.
 
 ## Core Workflow
 
@@ -38,28 +22,30 @@ At a high level, the repository supports the following analysis path:
 5. Extract weights with `pcha_extract_weights()`
 6. Add dominant archetype assignments with `phca_dominant_archetype()`
 7. Compute gene signatures with `compute_signature_cor()`
-8. Summarize archetype occupancy with `compute_occupancy()`
-9. Test replicate-aware contrasts with `compute_contrast()`
-10. Generate downstream occupancy, delta, QC, and enrichment plots
+8. Annotate acrchetypes with IPA using `annotate_ipa()`
+9. Summarize archetype occupancy with `compute_occupancy()`
+10. Test replicate-aware contrasts with `compute_contrast()`
+11. Generate downstream occupancy, delta, QC, and enrichment plots
 
 ## Repository Contents
 
-Some of the main scripts in this repository are:
+Some of the main functions in this package are:
 
 - `check_input.r`: validates Seurat objects and required metadata
-- `detect_group_col.r`, `detect_meta_cols.r`, `detect_sample_col.r`, `detect_cluster_col.R`: helper functions for metadata auto-detection
+- `detect_group_col.r`, `detect_meta_cols.r`, `detect_sample_col.r`, `detect_cluster_col.r`: helper functions for metadata auto-detection
 - `make_gene_universe.r`: defines a frozen background gene universe
 - `select_hvgs.r`: selects HVGs for PCA
-- `pareto_fit2.r`: main ParetoTI/PCHA fitting workflow with k-scan and bootstrap support
+- `pareto_fit.r`: main ParetoTI/PCHA fitting workflow with k-scan support
 - `phca_extract_weights.r`: extracts a standardized cells x k archetype weight matrix
 - `phca_dominant_archetype.r`: assigns dominant archetypes per cell
 - `phca_scan_metrics.r`: summarizes k-scan metrics
 - `compute_signature_cor.r`: computes correlation-based archetype signatures
+- `read_ipa_csv.r`, `annotate_ipa.r`: import and annotate archetypes using IPA pathways and upstream regulators
 - `compute_occupancy.r`: replicate-aware sample and sample-by-cluster occupancy summaries
 - `compute_contrasts.r`: replicate-aware condition contrasts for archetype occupancy
-- `compute_phca_delta_heatmap_df.r`, `compute_phca_occupancy.r`, `compute_phca_occupancy_sample_cluster.r`: helper summaries for downstream plotting
-- `plot_phca_delta_heatmap.r`, `plot_phca_occupancy_heatmap.r`, `plot_phca_occupancy_stacked.r`, `plot_phca_qc_hist.r`: plotting utilities
-- `plot_ipa_dotplot.r`, `annotate_ipa().R`: downstream pathway visualization/annotation helpers
+- `compute_pcha_delta_heatmap_df.r`: helper for replicate-aware delta occupancy heatmaps
+- `compute_pcha_weight_qc_from_W.r`: computes per-cell QC summaries from archetype weights
+- `plot_pcha_delta_heatmap.r`, `plot_pcha_occupancy_heatmap.r`, `plot_pcha_occupancy_stacked.r`, `plot_pcha_qc_hist.r`, `plot_ipa_dotplot.r`: plotting utilities
 
 ## Requirements
 
@@ -72,17 +58,18 @@ The workflow expects:
   - sample/replicate
   - cluster/cell type
 
-Likely R package dependencies include:
+Some R package dependencies include:
+```r
+library(Seurat)
+libary(Matrix)
+libary(dplyr)
+library(ggplot2)
+library(tibble)
+library(reticulate)
+libary(ParetoTI)
+```
 
-- `Seurat`
-- `Matrix`
-- `dplyr`
-- `ggplot2`
-- `tibble`
-- `ParetoTI`
-- `reticulate`
-
-`pareto_fit()` also checks for Python modules required by ParetoTI:
+pareto_fit() also checks for Python modules required by ParetoTI:
 
 - `py_pcha`
 - `geosketch`
@@ -184,15 +171,15 @@ The fitting workflow writes organized outputs to a run directory, including:
 
 This makes runs easier to reproduce and compare across different values of `k`.
 
-## Typical Use Cases
+## Example Uses
 
-This repository is especially useful for analyses such as:
+This package is useful for analyses such as:
 
-- identifying transcriptional archetypes in scRNA-seq
-- comparing archetype occupancy between conditions
-- studying cluster-specific redistribution of archetype programs
-- deriving and ranking archetype-associated genes
-- connecting archetype programs to pathway analyses and figure generation
+- Identifying transcriptional archetypes in scRNA-seq
+- Comparing archetype occupancy between conditions
+- Studying cluster-specific redistribution of archetype programs
+- Deriving and ranking archetype-associated genes
+- Connecting archetype programs to pathway analyses and figure generation
 
 ## Citation
 
