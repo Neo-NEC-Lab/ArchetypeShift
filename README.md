@@ -1,10 +1,17 @@
 # ArchetypeShift
 
-R-based workflow for fitting and interpreting ParetoTI archetype models in single-cell RNA-seq data, with a focus on Seurat objects, archetype weight extraction, signature discovery, replicate-aware occupancy summaries, and treatment/cluster contrast analyses.
+ArchetypeShift is an R package for fitting, annotating, and comparing transcriptional archetype programs in single-cell RNA-seq data, with particular emphasis on biological interpretation through correlation-based gene signatures, IPA canonical pathways, upstream regulators, and cluster/state localization. It is designed for Seurat-based workflows and supports reproducible preprocessing, ParetoTI/PCHA model fitting, archetype annotation, and downstream condition- and cluster-level comparisons. The package is especially useful when the goal is not only to identify archetypes, but also to interpret them as biologically meaningful programs across cell states and experimental conditions.
 
-This repository currently contains the core analysis functions as standalone R scripts. It is structured like an evolving package/workflow repository rather than a fully installed CRAN-style package.
+## Installation
 
-## What This Repo Does
+You can install ArchetypeShift with:
+
+```r
+devtools::install_github("Neo-NEC-Lab/ArchetypeShift")
+library(ArchetypeShift)
+```
+
+## What This Package Does
 
 This workflow is designed to help you:
 
@@ -17,8 +24,8 @@ This workflow is designed to help you:
 - summarize archetype occupancy at the sample and sample-by-cluster levels
 - test replicate-aware condition contrasts
 - generate publication-ready QC and summary plots
--
-The workflow was developed for epithelial archetype analysis in scRNA-seq, but the core functions are general enough to be adapted to other cell systems.
+
+The package was developed for epithelial archetype analysis in scRNA-seq, but the core functions are general enough to be adapted to other cell systems.
 
 ## Core Workflow
 
@@ -191,7 +198,18 @@ This repository is especially useful for analyses such as:
 
 This repository is under active development. The current codebase is functional for analysis workflows, but the repository is still organized primarily as sourced R scripts rather than a finalized installed package.
 
-## Citation / Attribution
+## Citation
 
--If you use this repository in a manuscript, please cite the relevant ParetoTI/PCHA and Seurat resources in addition to your own study-specific methods description.
+If you use ArchetypeShift in your manuscript, please cite:
+Future Publication Name
+
+**Primary Contact**: Adam Wilson
+**Lab**: Neo NEC Lab, University of Oklahoma Health Campus
+**Email**: adam-wilson@ou.edu
+
+## Data Availability
+
+Due to storage constraints, raw and processed single-cell data are stored on the OU HPC system.
+Metadata and example outputs can be shared upon request.
+
 -
