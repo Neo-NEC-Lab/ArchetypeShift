@@ -187,7 +187,7 @@ This repository is under active development. The current codebase is functional 
 If you use ArchetypeShift in your manuscript, please cite:
 Future Publication Name
 
-**Primary Contact**: Adam Wilson
+**Primary Contact**: Adam Wilson 
 **Lab**: Neo NEC Lab, University of Oklahoma Health Campus
 **Email**: adam-wilson@ou.edu
 
