@@ -114,7 +114,7 @@ fit_res <- pareto_fit(
 # Extract weights from a chosen fit
 W5 <- pcha_extract_weights(
   fit = fit_res$fits[["k5"]],
-  cell_ids = colnames(combined_no_IA),
+  cell_ids = colnames(sobj),
   prefix = "A"
 )
 
@@ -134,6 +134,22 @@ sig_k5 <- compute_signature_cor(
   weights_mat = W5,
   method = "spearman",
   top_n = 100L
+)
+
+# Read IPA exports
+IPA_pathways <- read_ipa_csv("IPA_pathways.csv")
+IPA_upstream <- read_ipa_csv("IPA_upstream.csv")
+
+# Annotate archetypes with IPA pathways and upstream regulators
+ipa_res_k5 <- annotate_ipa(
+  signatures = sig_k5$signatures,
+  pathways_df = IPA_pathways,
+  upstream_df = IPA_upstream,
+  universe = NULL,
+  by_cluster = TRUE,
+  method = "fisher",
+  min_overlap = 2L,
+  p_adjust = "BH"
 )
 
 # Replicate-aware occupancy summaries
