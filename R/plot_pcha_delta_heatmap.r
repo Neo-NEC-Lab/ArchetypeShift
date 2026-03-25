@@ -25,6 +25,23 @@
 #'
 #' @examples
 #' \dontrun{
+#' occ_sc <- compute_pcha_occupancy(
+#'   obj = combined_no_IA,
+#'   weight_cols = paste0("A5_A", 1:5),
+#'   group_cols = c("orig.ident", "condition2", "merged_cluster_annotations")
+#' )
+#'
+#' df_delta <- compute_pcha_delta_heatmap_df(
+#'   occ_sc = occ_sc,
+#'   sample_col = "orig.ident",
+#'   group_col = "condition2",
+#'   cluster_col = "merged_cluster_annotations",
+#'   weight_cols = paste0("A5_A", 1:5),
+#'   group1 = "NEC",
+#'   group2 = "NEC_HA",
+#'   drop_weight_prefix_regex = "^A5_"
+#' )
+#'
 #' p <- plot_pcha_delta_heatmap(
 #'   df_delta = df_delta,
 #'   cluster_order = cluster_order,
