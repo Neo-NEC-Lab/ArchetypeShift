@@ -178,10 +178,6 @@ This repository is especially useful for analyses such as:
 - deriving and ranking archetype-associated genes
 - connecting archetype programs to pathway analyses and figure generation
 
-## Status
-
-This repository is under active development. The current codebase is functional for analysis workflows, but the repository is still organized primarily as sourced R scripts rather than a finalized installed package.
-
 ## Citation
 
 If you use ArchetypeShift in your manuscript, please cite:  
