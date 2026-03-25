@@ -1,0 +1,27 @@
+Package: ArchetypeShift
+Type: Package
+Title: Archetype Analysis, Annotation, and Comparison for Single-Cell RNA-Seq
+Version: 0.1.0
+Authors@R: 
+    person("Adam", "Wilson", email = "adam-wilson@ou.edu", role = c("aut", "cre"))
+Description: Tools for fitting, annotating, and comparing transcriptional archetype programs in single-cell RNA-seq data. ArchetypeShift supports Seurat-based workflows for input validation, gene-universe definition, highly variable gene selection, ParetoTI/PCHA model fitting, extraction of per-cell archetype weights, correlation-based gene signature discovery, IPA-based pathway and upstream regulator annotation, replicate-aware occupancy summaries, condition contrasts, and downstream visualization.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    dplyr,
+    ggplot2,
+    irlba,
+    Matrix,
+    methods,
+    ParetoTI,
+    readr,
+    reticulate,
+    rlang,
+    Seurat,
+    stats,
+    tidyr,
+    tibble,
+    utils
