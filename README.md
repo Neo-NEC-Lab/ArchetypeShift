@@ -13,7 +13,7 @@ library(ArchetypeShift)
 
 ## Core Workflow
 
-At a high level, the repository supports the following analysis path:
+The package supports the following analysis path:
 
 1. Validate the Seurat object and resolve metadata columns with `check_input()`
 2. Define a stable gene universe with `make_gene_universe()`
