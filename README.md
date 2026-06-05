@@ -192,5 +192,4 @@ Future Publication Name
 
 ## Data Availability
 
-Due to storage constraints, raw and processed single-cell data are stored on the OU HPC system.   
-Metadata and example outputs can be shared upon request.
+De-identified raw FASTQ files and processed Cell Ranger outputs generated in this study will be publicly available through GEO. The source code and example workflow are available in this repository.
