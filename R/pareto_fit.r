@@ -55,14 +55,14 @@
 #'   `3:10`.
 #' @param k_targets Optional integer vector of target k values to fit with
 #'   [ParetoTI::fit_pch()]. Default is `c(4L, 5L)`.
-#' @param do_bootstrap Logical; if `TRUE`, enables bootstrap fitting in
-#'   [ParetoTI::fit_pch()] for each `k_targets` value. Default is `FALSE`.
+#' @param do_bootstrap Logical; if `TRUE`, requests bootstrap fitting for each
+#'   `k_targets` value when supported by the installed `ParetoTI` version.
 #' @param bootstrap_n Integer >= 1 giving the number of bootstrap replicates
-#'   used when `do_bootstrap = TRUE`. Default is `20L`.
+#'   used when bootstrap fitting is supported.
 #' @param bootstrap_prop Numeric in `(0, 1]` giving the fraction of cells used
-#'   per bootstrap replicate when `do_bootstrap = TRUE`. Default is `0.70`.
-#' @param bootstrap_type Bootstrap mode passed to [ParetoTI::fit_pch()], either
-#'   `"m"` or `"s"`.
+#'   per bootstrap replicate when bootstrap fitting is supported.
+#' @param bootstrap_type Bootstrap mode passed to [ParetoTI::fit_pch()] when
+#'   supported, either `"m"` or `"s"`.
 #'
 #' @return A named list with analysis metadata and key output paths:
 #' \describe{
@@ -77,10 +77,10 @@
 #'   \item{kscan_rds}{Path to the saved ParetoTI k-scan object.}
 #'   \item{archetype_fit_paths}{Character vector of saved target-k fit paths.}
 #'   \item{seed}{Random seed used.}
-#'   \item{do_bootstrap}{Logical indicating whether bootstrap fitting was used.}
-#'   \item{bootstrap_n}{Bootstrap replicate count.}
-#'   \item{bootstrap_prop}{Bootstrap sampling proportion.}
-#'   \item{bootstrap_type}{Bootstrap mode used.}
+#'   \item{do_bootstrap}{Logical indicating whether bootstrap fitting was actually used.}
+#'   \item{bootstrap_n}{Bootstrap replicate count requested.}
+#'   \item{bootstrap_prop}{Bootstrap sampling proportion requested.}
+#'   \item{bootstrap_type}{Bootstrap mode requested.}
 #' }
 #'
 #' @details
@@ -93,6 +93,10 @@
 #' The function checks for required R package dependencies and for Python modules
 #' required by ParetoTI through `reticulate`, including `py_pcha` and
 #' `geosketch`.
+#'
+#' The internal `ParetoTI::fit_pch()` call is matched to the installed API,
+#' using either `k` or `noc` as required, and only forwarding bootstrap-related
+#' arguments when they are supported.
 #'
 #' @examples
 #' \dontrun{
@@ -173,6 +177,7 @@ pareto_fit <- function(
     stop("`seed` must be a single numeric value.", call. = FALSE)
   }
   seed <- as.integer(seed)
+
   if (!is.character(gene_slot) || length(gene_slot) != 1L || is.na(gene_slot) || !nzchar(gene_slot)) {
     stop("`gene_slot` must be a single non-empty character string.", call. = FALSE)
   }
@@ -289,6 +294,35 @@ pareto_fit <- function(
   }
   if (!reticulate::py_module_available("geosketch")) {
     stop("Python module 'geosketch' is not available to reticulate.", call. = FALSE)
+  }
+
+  fit_pch_formals <- names(formals(ParetoTI::fit_pch))
+  if (!any(c("k", "noc") %in% fit_pch_formals)) {
+    stop(
+      "Installed ParetoTI::fit_pch() does not expose either `k` or `noc`; ",
+      "unsupported ParetoTI API.",
+      call. = FALSE
+    )
+  }
+
+  k_fit_pch_formals <- names(formals(ParetoTI::k_fit_pch))
+  if (!("ks" %in% k_fit_pch_formals)) {
+    stop(
+      "Installed ParetoTI::k_fit_pch() does not expose `ks`; unsupported ParetoTI API.",
+      call. = FALSE
+    )
+  }
+
+  bootstrap_supported <- any(c(
+    "bootstrap", "bootstrap_N", "bootstrap_n", "sample_prop", "bootstrap_type"
+  ) %in% fit_pch_formals)
+
+  if (isTRUE(do_bootstrap) && !bootstrap_supported) {
+    warning(
+      "Bootstrap fitting was requested, but the installed ParetoTI::fit_pch() ",
+      "does not support bootstrap arguments. Proceeding without bootstrap.",
+      call. = FALSE
+    )
   }
 
   # ----------------------------
@@ -411,14 +445,27 @@ pareto_fit <- function(
     message("Running k_fit_pch for ks = ", paste(ks, collapse = ","))
   }
 
-  k_scan <- ParetoTI::k_fit_pch(
+  k_scan_args <- list(
     data = pca_for_pareto,
-    ks = ks,
-    bootstrap = FALSE,
-    simplex = FALSE,
-    var_in_dims = FALSE,
-    normalise_var = TRUE
+    ks = ks
   )
+  if ("bootstrap" %in% k_fit_pch_formals) {
+    k_scan_args$bootstrap <- FALSE
+  }
+  if ("simplex" %in% k_fit_pch_formals) {
+    k_scan_args$simplex <- FALSE
+  }
+  if ("var_in_dims" %in% k_fit_pch_formals) {
+    k_scan_args$var_in_dims <- FALSE
+  }
+  if ("normalise_var" %in% k_fit_pch_formals) {
+    k_scan_args$normalise_var <- TRUE
+  }
+  if ("verbose" %in% k_fit_pch_formals) {
+    k_scan_args$verbose <- verbose
+  }
+
+  k_scan <- do.call(ParetoTI::k_fit_pch, k_scan_args)
 
   kscan_rds <- file.path(
     run_dir,
@@ -438,18 +485,46 @@ pareto_fit <- function(
         message("Fitting archetypes for k = ", k)
       }
 
-      fit_k <- ParetoTI::fit_pch(
-        data = pca_for_pareto,
-        k = k,
-        bootstrap = isTRUE(do_bootstrap),
-        bootstrap_N = if (isTRUE(do_bootstrap)) bootstrap_n else 0L,
-        sample_prop = if (isTRUE(do_bootstrap)) bootstrap_prop else 1,
-        bootstrap_type = bootstrap_type,
-        seed = seed,
-        simplex = FALSE,
-        var_in_dims = FALSE,
-        normalise_var = TRUE
-      )
+      fit_args <- list(data = pca_for_pareto)
+
+      if ("k" %in% fit_pch_formals) {
+        fit_args$k <- as.integer(k)
+      } else {
+        fit_args$noc <- as.integer(k)
+      }
+
+      if ("bootstrap" %in% fit_pch_formals) {
+        fit_args$bootstrap <- isTRUE(do_bootstrap)
+      }
+      if ("bootstrap_N" %in% fit_pch_formals) {
+        fit_args$bootstrap_N <- if (isTRUE(do_bootstrap)) bootstrap_n else 0L
+      }
+      if ("bootstrap_n" %in% fit_pch_formals) {
+        fit_args$bootstrap_n <- if (isTRUE(do_bootstrap)) bootstrap_n else 0L
+      }
+      if ("sample_prop" %in% fit_pch_formals) {
+        fit_args$sample_prop <- if (isTRUE(do_bootstrap)) bootstrap_prop else 1
+      }
+      if ("bootstrap_type" %in% fit_pch_formals) {
+        fit_args$bootstrap_type <- bootstrap_type
+      }
+      if ("seed" %in% fit_pch_formals) {
+        fit_args$seed <- seed
+      }
+      if ("simplex" %in% fit_pch_formals) {
+        fit_args$simplex <- FALSE
+      }
+      if ("var_in_dims" %in% fit_pch_formals) {
+        fit_args$var_in_dims <- FALSE
+      }
+      if ("normalise_var" %in% fit_pch_formals) {
+        fit_args$normalise_var <- TRUE
+      }
+      if ("verbose" %in% fit_pch_formals) {
+        fit_args$verbose <- verbose
+      }
+
+      fit_k <- do.call(ParetoTI::fit_pch, fit_args)
 
       fit_path <- file.path(run_dir, "models", paste0("pch_fit_k", k, ".rds"))
       saveRDS(fit_k, fit_path)
@@ -472,7 +547,7 @@ pareto_fit <- function(
     kscan_rds = kscan_rds,
     archetype_fit_paths = archetype_fit_paths,
     seed = seed,
-    do_bootstrap = isTRUE(do_bootstrap),
+    do_bootstrap = isTRUE(do_bootstrap) && bootstrap_supported,
     bootstrap_n = bootstrap_n,
     bootstrap_prop = bootstrap_prop,
     bootstrap_type = bootstrap_type
