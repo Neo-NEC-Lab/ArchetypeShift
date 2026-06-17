@@ -21,17 +21,18 @@
 #'   per group with weight >= threshold for each archetype (suffix "_frac").
 #' @param min_cells Integer >= 1. Drop sample (or sample×cluster) groups with fewer cells.
 #'
-#' @return A list with:
-#'   - sample_occ: data.frame with one row per sample × group and mean weights (+ n_cells)
-#'   - sample_cluster_occ: data.frame with one row per sample × group × cluster (if cluster_col not NULL)
-#'   - spec: list describing detected columns and weight names
-#' 
-#' #' @examples
-#' 
+#' @return A list with the following elements:
+#' \itemize{
+#'   \item \code{sample_occ}: data frame with one row per sample × group and mean weights (+ n_cells).
+#'   \item \code{sample_cluster_occ}: data frame with one row per sample × group × cluster
+#'   if \code{cluster_col} is not \code{NULL}.
+#'   \item \code{spec}: list describing detected columns and weight names.
+#' }
+#'
+#' @examples
+#' \dontrun{
 #' obj <- combined_no_IA
 #' weight_cols_k5 <- paste0("A5_A", 1:5)
-#'
-#' # Replicate-aware occupancy summaries
 #' occ_k5 <- compute_occupancy(
 #'   obj = obj,
 #'   weight_cols = weight_cols_k5,
@@ -41,6 +42,7 @@
 #'   threshold = NULL,
 #'   min_cells = 10L
 #' )
+#' }
 #'
 #' @export
 compute_occupancy <- function(
@@ -271,36 +273,3 @@ compute_occupancy <- function(
   )
   out
 }
-
-
-# =============================
-# [SETUP] packages + inputs
-# =============================
-suppressPackageStartupMessages({
-  library(Seurat)
-  library(dplyr)
-})
-
-obj <- combined_no_IA
-
-# =============================
-# [OPTION 1] Use archetype weights already stored in Seurat metadata
-# (this is the most common workflow for you)
-# =============================
-# If your k=5 weights are named like: A5_A1 ... A5_A5
-weight_cols_k5 <- paste0("A5_A", 1:5)
-
-occ_k5 <- compute_occupancy(
-  obj = obj,
-  weight_cols = weight_cols_k5,
-  sample_col = "orig.ident",
-  group_col = "condition2",
-  cluster_col = "merged_cluster_annotations",
-  threshold = NULL,
-  min_cells = 10L
-)
-
-# View outputs
-print(head(occ_k5$sample_occ, 10))
-print(head(occ_k5$sample_cluster_occ, 10))
-str(occ_k5$spec)
